@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFC107"/> <!-- 눌렀을 때 -->
+            <corners android:radius="24dp"/>
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:startColor="#FFEE58"
+                android:endColor="#FBC02D"
+                android:angle="90"/>
+            <corners android:radius="24dp"/>
+            <stroke android:width="2dp" android:color="#F57F17"/>
+        </shape>
+    </item>
+</selector>

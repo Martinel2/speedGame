@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reaction_game_root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- 현재 스테이지 표시 -->
+    <TextView
+        android:id="@+id/stage_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stage 1"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp" />
+
+    <!-- 반응 버튼 -->
+    <Button
+        android:id="@+id/game_button"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:text="클릭!"
+        android:visibility="invisible"
+        android:layout_centerInParent="true" />
+
+    <!-- Pause 버튼 -->
+    <Button
+        android:id="@+id/pause_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pause"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp" />
+
+    <!-- 일시정지 오버레이 -->
+    <RelativeLayout
+        android:id="@+id/pause_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#88000000"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/pause_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="일시정지"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true" />
+
+        <Button
+            android:id="@+id/resume_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="재개"
+            android:layout_below="@id/pause_text"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="24dp" />
+
+        <Button
+            android:id="@+id/main_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="메인으로"
+            android:layout_below="@id/resume_button"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp" />
+    </RelativeLayout>
+
+    <!-- 축하합니다 애니메이션 텍스트 -->
+    <TextView
+        android:id="@+id/congrats_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="축하합니다!"
+        android:textSize="36sp"
+        android:textStyle="bold"
+        android:textColor="#FFEB3B"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
+    <!-- 평균 반응속도 표시 (하단 중앙) -->
+    <TextView
+        android:id="@+id/avg_reaction_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="평균: 0ms"
+        android:textSize="16sp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="64dp" />
+
+    <!-- 최고 반응속도 표시 (하단 중앙, 평균 아래) -->
+    <TextView
+        android:id="@+id/best_reaction_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="최고: 0ms"
+        android:textSize="16sp"
+        android:layout_above="@id/avg_reaction_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 통과 기준 표시 (하단 중앙, 최고 아래) -->
+    <TextView
+        android:id="@+id/threshold_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="기준: 350ms"
+        android:textSize="16sp"
+        android:layout_above="@id/best_reaction_text"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp" />
+</RelativeLayout>

@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">term</string>
+    <string name="navigation_drawer_open">메뉴 열기</string>
+    <string name="navigation_drawer_close">메뉴 닫기</string>
+
+    <!-- kakao link setting -->
+    <string name="kakao_app_key">1198b945ca70b85006d9a95f33583c9a</string>
+    <string name="kakao_scheme">1198b945ca70b85006d9a95f33583c9a</string>
+    <string name="kakaolink_host">kakaolink</string>
+</resources>

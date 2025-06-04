@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/reaction_game_root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="24dp">
+
+    <!-- 스테이지 클리어 문구 -->
+    <TextView
+        android:id="@+id/stageClearText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stage Clear!"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp" />
+
+    <!-- 예측된 연령대 출력 -->
+    <TextView
+        android:id="@+id/predictedAgeText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="예상 연령대: ??세"
+        android:textSize="20sp"
+        android:layout_marginBottom="24dp" />
+
+    <!-- 다음 스테이지로 버튼 -->
+    <Button
+        android:id="@+id/nextStageButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="다음 스테이지로 진행" />
+
+    <Button
+        android:id="@+id/shareKakaoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="카카오톡으로 공유하기"
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal"/>
+
+</LinearLayout>
