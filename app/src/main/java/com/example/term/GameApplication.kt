@@ -12,7 +12,7 @@ class GameApplication : Application() {
         super.onCreate()
         FirebaseApp.initializeApp(this) // Firebase 초기화
         KakaoSdk.init(this, "1198b945ca70b85006d9a95f33583c9a") // 카카오 개발자 콘솔에서 확인
-        var keyHash =Utility.getKeyHash(this)
-        Log.i("GlobalApplication","$keyHash")
+        var keyHash = Utility.getKeyHash(this)
+        Log.i("GlobalApplication", "$keyHash")
     }
 }
