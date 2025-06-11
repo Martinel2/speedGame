@@ -288,11 +288,9 @@ class ReactionGameActivity : AppCompatActivity() {
         congratsText.animate().alpha(1f).setDuration(700).withEndAction {
             congratsText.animate().alpha(0f).setDuration(700).withEndAction {
                 congratsText.visibility = View.GONE
-                val recent = reactionTimes.filter { System.currentTimeMillis() - it.first <= 10_000 }
-                val currentBest = recent.minOfOrNull { it.second } ?: Long.MAX_VALUE
                 var isBest = false
-                if (currentBest < bestReactionTime) {
-                    bestReactionTime = currentBest
+                if (finalAvg < bestReactionTime) {
+                    bestReactionTime = finalAvg.toLong()
                     prefs.edit().putLong("best_reaction_time", bestReactionTime).apply()
                     uploadBestReactionTimeToFirestore(bestReactionTime)
                     isBest = true

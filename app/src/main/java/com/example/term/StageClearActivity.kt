@@ -82,8 +82,8 @@ class StageClearActivity : AppCompatActivity() {
                                     description = "내 반응속도 결과를 확인해보세요!",
                                     imageUrl = imageUrl,
                                     link = Link(
-                                        webUrl = "https://your-service.com",
-                                        mobileWebUrl = "https://your-service.com"
+                                        webUrl = "https://github.com/Martinel2/speedGame",
+                                        mobileWebUrl = "https://github.com/Martinel2/speedGame"
                                     )
                                 )
                             )
@@ -117,8 +117,8 @@ class StageClearActivity : AppCompatActivity() {
                                     description = "내 반응속도 결과를 확인해보세요!",
                                     imageUrl = imageUrl,
                                     link = Link(
-                                        webUrl = "https://your-service.com",
-                                        mobileWebUrl = "https://your-service.com"
+                                        webUrl = "https://github.com/Martinel2/speedGame",
+                                        mobileWebUrl = "https://github.com/Martinel2/speedGame"
                                     )
                                 )
                             )
