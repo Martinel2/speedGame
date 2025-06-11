@@ -1,10 +1,14 @@
 // ReactionGameActivity.kt (Measurement Protocol + Firebase SDK 병행 적용)
 package com.example.term
 
+import android.Manifest
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -13,8 +17,11 @@ import android.util.Log
 import android.util.TypedValue
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.installations.FirebaseInstallations
@@ -40,7 +47,7 @@ class ReactionGameActivity : AppCompatActivity() {
     private var stageLevel = 1
     private var startTime: Long = 0
     private val reactionTimes = mutableListOf<Pair<Long, Long>>()  // (timestamp, reactionTime)
-    private lateinit var gameButton: Button
+    private lateinit var gameButton: ImageView
     private lateinit var stageTextView: TextView
     private lateinit var clientId: String
     private var stageLoopJob: Job? = null
@@ -64,6 +71,9 @@ class ReactionGameActivity : AppCompatActivity() {
     private lateinit var thresholdText: TextView
     private lateinit var bestReactionText: TextView
     private lateinit var predictor:TFLitePredictor
+    private lateinit var fullButtonImage: Bitmap
+    private lateinit var buttonBitmaps: List<Bitmap>
+    private lateinit var clickSound: MediaPlayer
 
     // 3x3 그리드별 [시도, 성공, 가중치] 기록용 데이터 클래스
     data class GridStat(var attempts: Int = 0, var success: Int = 0, var weightedScore: Double = 0.0)
@@ -71,6 +81,7 @@ class ReactionGameActivity : AppCompatActivity() {
 
     // Quadruple 임시 정의
     data class Quadruple<A, B, C, D>(val first: A, val second: B, val third: C, val fourth: D)
+
 
     // dp → px 변환
     private fun dpToPx(dp: Int): Int {
@@ -95,12 +106,41 @@ class ReactionGameActivity : AppCompatActivity() {
         }
     }
 
+
+    private fun loadAndSliceButtonImage() {
+        val drawable = ContextCompat.getDrawable(this, R.drawable.colorful_buttons)
+        val bitmapDrawable = drawable as BitmapDrawable
+        fullButtonImage = bitmapDrawable.bitmap
+
+        val rows = 3
+        val cols = 3
+        val cellWidth = fullButtonImage.width / cols
+        val cellHeight = fullButtonImage.height / rows
+
+        buttonBitmaps = mutableListOf()
+
+        for (row in 0 until rows) {
+            for (col in 0 until cols) {
+                val x = col * cellWidth
+                val y = row * cellHeight
+                val buttonBitmap = Bitmap.createBitmap(fullButtonImage, x, y, cellWidth, cellHeight)
+                (buttonBitmaps as MutableList).add(buttonBitmap)
+            }
+        }
+    }
+
+    private fun getRandomButtonBitmap(): Bitmap {
+        return buttonBitmaps.random()
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         predictor = TFLitePredictor(applicationContext)
         setContentView(R.layout.activity_reaction_game)
-
+        loadAndSliceButtonImage()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        clickSound = MediaPlayer.create(this, R.raw.button_click)
 
         // SharedPreferences 초기화 및 최고 기록 불러오기
         prefs = getSharedPreferences("game_prefs", MODE_PRIVATE)
@@ -164,21 +204,29 @@ class ReactionGameActivity : AppCompatActivity() {
         val delay = (1400..1600).random().toLong()
         val duration = (1500..2000).random().toLong()
         currentButtonDuration = duration
+
         Handler(Looper.getMainLooper()).postDelayed({
             if (isPaused) return@postDelayed
+
             val buttonSizeDp = (50..150).random()
             val buttonSizePx = dpToPx(buttonSizeDp)
-            val color = getRandomColor()
-            gameButton.setBackgroundColor(color)
+
+            // ✅ 이미지 랜덤 적용
+            val bitmap = getRandomButtonBitmap()
+            (gameButton as ImageView).setImageBitmap(bitmap)
+
             val (x, y, gridX, gridY) = getRandomButtonPositionAndGrid(buttonSizeDp)
             gameButton.x = x
             gameButton.y = y
-            gameButton.width = buttonSizePx
-            gameButton.height = buttonSizePx
+            gameButton.layoutParams.width = buttonSizePx
+            gameButton.layoutParams.height = buttonSizePx
+            gameButton.requestLayout()
+
             gridStats[gridX][gridY].attempts++
             gameButton.visibility = View.VISIBLE
             startTime = System.currentTimeMillis()
             getRecentAverage()?.let { updateAvgReactionText(it) }
+
             buttonHandler = Handler(Looper.getMainLooper())
             buttonRunnable = Runnable {
                 if (gameButton.visibility == View.VISIBLE) {
@@ -186,11 +234,30 @@ class ReactionGameActivity : AppCompatActivity() {
                 }
             }
             buttonHandler?.postDelayed(buttonRunnable!!, duration)
+
             gameButton.setOnClickListener {
-                onGameButtonClicked()
+                clickSound.seekTo(0) // 항상 처음부터 재생
+                clickSound.start()
+
+                gameButton.animate()
+                    .scaleX(1.2f)
+                    .scaleY(1.2f)
+                    .setDuration(100)
+                    .withEndAction {
+                        gameButton.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(100)
+                            .withEndAction {
+                                onGameButtonClicked()
+                            }
+                            .start()
+                    }
+                    .start()
             }
         }, delay)
     }
+
 
     // 버튼 클릭 시 timestamp와 함께 반응속도 저장
     private fun onGameButtonClicked() {
@@ -215,8 +282,23 @@ class ReactionGameActivity : AppCompatActivity() {
         val now = System.currentTimeMillis()
         reactionTimes.add(now to duration)
         getRecentAverage()?.let { updateAvgReactionText(it) }
-        gameButton.visibility = View.INVISIBLE
-        prepareNextButton()
+        gameButton.animate()
+            .alpha(0.3f)
+            .setDuration(100)
+            .withEndAction {
+                gameButton.setColorFilter(Color.RED)  // 빨간 필터 씌우기
+                gameButton.animate()
+                    .alpha(1f)
+                    .setDuration(100)
+                    .withEndAction {
+                        gameButton.clearColorFilter()
+                        gameButton.visibility = View.INVISIBLE
+                        prepareNextButton()
+                    }
+                    .start()
+            }
+            .start()
+
     }
 
 
@@ -533,6 +615,7 @@ class ReactionGameActivity : AppCompatActivity() {
         return (getStageThreshold(stage) * 1.8).toInt()
     }
 
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onResume() {
         super.onResume()
         val rootLayout = findViewById<View>(R.id.reaction_game_root_layout)  // XML의 루트 id

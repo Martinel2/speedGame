@@ -1,8 +1,10 @@
 package com.example.term
 
+import android.Manifest
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +27,7 @@ class StageListActivity : AppCompatActivity() {
         }
         recyclerView.adapter = adapter
     }
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onResume() {
         super.onResume()
         val rootLayout = findViewById<View>(R.id.reaction_game_root_layout)  // XML의 루트 id

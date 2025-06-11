@@ -1,20 +1,28 @@
 package com.example.term
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
+import android.util.TypedValue
 import android.view.View
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.firebase.firestore.FirebaseFirestore
 
 class MeasureSkillActivity : AppCompatActivity() {
     private lateinit var infoText: TextView
-    private lateinit var testButton: Button
+    private lateinit var testButton: ImageView
     private lateinit var startButton: Button
     private lateinit var resultText: TextView
     private var reactionTimes = mutableListOf<Long>()
@@ -24,7 +32,42 @@ class MeasureSkillActivity : AppCompatActivity() {
     private var bestReactionTime: Long = Long.MAX_VALUE
     private lateinit var prefs: android.content.SharedPreferences
     private lateinit var clientId: String
+    private lateinit var clickSound: MediaPlayer
+    private lateinit var fullButtonImage: Bitmap
+    private lateinit var buttonBitmaps: List<Bitmap>
 
+
+    private fun loadAndSliceButtonImage() {
+        val drawable = ContextCompat.getDrawable(this, R.drawable.colorful_buttons)
+        val bitmapDrawable = drawable as BitmapDrawable
+        fullButtonImage = bitmapDrawable.bitmap
+
+        val rows = 3
+        val cols = 3
+        val cellWidth = fullButtonImage.width / cols
+        val cellHeight = fullButtonImage.height / rows
+
+        buttonBitmaps = mutableListOf()
+        for (row in 0 until rows) {
+            for (col in 0 until cols) {
+                val x = col * cellWidth
+                val y = row * cellHeight
+                val buttonBitmap = Bitmap.createBitmap(fullButtonImage, x, y, cellWidth, cellHeight)
+                (buttonBitmaps as MutableList).add(buttonBitmap)
+            }
+        }
+    }
+
+    private fun getRandomButtonBitmap(): Bitmap {
+        return buttonBitmaps.random()
+    }
+
+    // dp → px 변환
+    private fun dpToPx(dp: Int): Int {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP, dp.toFloat(), resources.displayMetrics
+        ).toInt()
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_measure_skill)
@@ -36,6 +79,9 @@ class MeasureSkillActivity : AppCompatActivity() {
         prefs = getSharedPreferences("game_prefs", MODE_PRIVATE)
         bestReactionTime = prefs.getLong("best_reaction_time", Long.MAX_VALUE)
         clientId = prefs.getString("client_id", "default") ?: "default"
+        clickSound = MediaPlayer.create(this, R.raw.button_click)
+        loadAndSliceButtonImage()
+
 
         testButton.visibility = View.INVISIBLE
         resultText.visibility = View.INVISIBLE
@@ -45,10 +91,27 @@ class MeasureSkillActivity : AppCompatActivity() {
         }
         testButton.setOnClickListener {
             if (testRunning) {
-                val reaction = System.currentTimeMillis() - startTime
-                reactionTimes.add(reaction)
-                testButton.visibility = View.INVISIBLE
-                showNextButtonWithDelay()
+                clickSound.seekTo(0)
+                clickSound.start()
+
+                testButton.animate()
+                    .scaleX(1.2f)
+                    .scaleY(1.2f)
+                    .setDuration(100)
+                    .withEndAction {
+                        testButton.animate()
+                            .scaleX(1f)
+                            .scaleY(1f)
+                            .setDuration(100)
+                            .withEndAction {
+                                val reaction = System.currentTimeMillis() - startTime
+                                reactionTimes.add(reaction)
+                                testButton.visibility = View.INVISIBLE
+                                showNextButtonWithDelay()
+                            }
+                            .start()
+                    }
+                    .start()
             }
         }
     }
@@ -75,12 +138,25 @@ class MeasureSkillActivity : AppCompatActivity() {
         val delay = (1000..2000).random().toLong()
         Handler(Looper.getMainLooper()).postDelayed({
             if (!testRunning) return@postDelayed
+
+            val bitmap = getRandomButtonBitmap()
+            testButton.setImageBitmap(bitmap)
+
+            val sizePx = dpToPx((60..120).random())
+            testButton.layoutParams.width = sizePx
+            testButton.layoutParams.height = sizePx
+            testButton.requestLayout()
+
             testButton.x = (100..600).random().toFloat()
             testButton.y = (200..1000).random().toFloat()
+            testButton.alpha = 0f
             testButton.visibility = View.VISIBLE
+            testButton.animate().alpha(1f).setDuration(150).start()
+
             startTime = System.currentTimeMillis()
         }, delay)
     }
+
 
     private fun showResult() {
         val avg = reactionTimes.average().toLong()
@@ -143,6 +219,8 @@ class MeasureSkillActivity : AppCompatActivity() {
         )
         db.collection("user_best").document(clientId).set(data)
     }
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
     override fun onResume() {
         super.onResume()
         val rootLayout = findViewById<View>(R.id.reaction_game_root_layout)  // XML의 루트 id

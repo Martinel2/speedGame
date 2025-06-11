@@ -11,12 +11,14 @@
         android:orientation="vertical">
 
         <!-- Toolbar -->
+
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="70dp"
             android:background="@color/white"
-            android:theme="?attr/actionBarTheme" />
+            android:theme="?attr/actionBarTheme"
+            android:paddingTop="16dp"/>
 
         <TextView
             android:id="@+id/text_weather"
@@ -136,7 +138,8 @@
         android:layout_gravity="start"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="#FFFFFF">
+        android:background="#FFFFFF"
+        android:layout_marginTop="40dp">
 
         <Button
             android:id="@+id/change_image_button"
