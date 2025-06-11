@@ -23,13 +23,13 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp" />
 
-    <Button
+    <!-- res/layout/activity_measure_skill.xml -->
+    <ImageView
         android:id="@+id/test_button"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:text="클릭!"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:visibility="invisible"
-        android:layout_centerInParent="true" />
+        />
 
     <TextView
         android:id="@+id/result_text"

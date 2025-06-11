@@ -18,13 +18,12 @@
         android:layout_marginTop="16dp" />
 
     <!-- 반응 버튼 -->
-    <Button
+    <ImageView
         android:id="@+id/game_button"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:text="클릭!"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:visibility="invisible"
-        android:layout_centerInParent="true" />
+        android:layout_gravity="center" />
 
     <!-- Pause 버튼 -->
     <Button
